@@ -11,7 +11,7 @@ import { AddContract } from "@/components/add-contract"
 import { OracleOverview } from "@/components/oracle-overview"
 import { short } from "@/lib/format"
 import { Activity, ShieldAlert, Gauge, ListChecks, RefreshCw, ArrowUpRight, ArrowRight, ShieldCheck, TrendingUp, Radio } from "lucide-react"
-const LIVE_URL = "https://artem1981777.github.io/genlayer-consensus-console/"
+const LIVE_URL = "https://artem1981777.github.io/genlayer-verifiable-consensus/"
 export default function Overview() {
   const { projectId } = useApp()
   const project = getProject(projectId)
@@ -41,7 +41,7 @@ export default function Overview() {
           <p>GenLayer Consensus Console is a production-style control room for Intelligent Contracts that reason over policy, evidence and live data — with every accepted decision recorded on-chain.</p>
           <div className="flex gap wrap hero-actions">
             <a className="btn primary" href={LIVE_URL} target="_blank" rel="noreferrer">Open live dApp <ArrowUpRight size={15} /></a>
-            <a className="btn" href="https://github.com/Artem1981777/genlayer-consensus-console" target="_blank" rel="noreferrer">Explore source <ArrowRight size={15} /></a>
+            <a className="btn" href="https://github.com/Artem1981777/genlayer-verifiable-consensus" target="_blank" rel="noreferrer">Explore source <ArrowRight size={15} /></a>
           </div>
         </div>
         <div className="hero-orb" aria-hidden="true"><div className="orb-ring ring-one" /><div className="orb-ring ring-two" /><div className="orb-core">GL<span>CONSENSUS</span></div></div>

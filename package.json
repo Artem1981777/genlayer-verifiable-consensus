@@ -1,8 +1,8 @@
 {
-  "name": "genlayer-consensus-console",
+  "name": "genlayer-verifiable-consensus",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://artem1981777.github.io/genlayer-consensus-console/",
+  "homepage": "https://artem1981777.github.io/genlayer-verifiable-consensus/",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

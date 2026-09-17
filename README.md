@@ -4,12 +4,12 @@ Interactive multi-contract dApp on GenLayer Testnet Bradbury: a thin browser cli
 
 ## Open the site
 
-### [Launch GenLayer Consensus Console →](https://artem1981777.github.io/genlayer-consensus-console/)
+### [Launch GenLayer Consensus Console →](https://artem1981777.github.io/genlayer-verifiable-consensus/)
 
 The public live site is deployed on GitHub Pages and connects directly to GenLayer Testnet Bradbury. Connect an EIP-6963 wallet to inspect the seeded contracts, add a case, and submit real contract actions. The site includes the Overview dashboard, Analytics, and the AI Escrow Arbiter experience.
 
-- **Live dApp:** <https://artem1981777.github.io/genlayer-consensus-console/>
-- **Source repository:** <https://github.com/Artem1981777/genlayer-consensus-console>
+- **Live dApp:** <https://artem1981777.github.io/genlayer-verifiable-consensus/>
+- **Source repository:** <https://github.com/Artem1981777/genlayer-verifiable-consensus>
 - **Network:** GenLayer Testnet Bradbury · chain `4221`
 - **Deployment:** GitHub Pages from the `gh-pages` branch
 
@@ -287,8 +287,8 @@ The strict allowlist lives in `SUCCESS_RESULTS` / `classifyExecution`
 Requirements: Node ≥ 18, npm, a browser with an EIP-6963 wallet (MetaMask).
 
 ```bash
-git clone https://github.com/Artem1981777/genlayer-consensus-console.git
-cd genlayer-consensus-console
+git clone https://github.com/Artem1981777/genlayer-verifiable-consensus.git
+cd genlayer-verifiable-consensus
 npm ci
 npm run dev
 ```
@@ -455,7 +455,7 @@ evidence pack.
 ## Project structure
 
 ```
-genlayer-consensus-console/
+genlayer-verifiable-consensus/
 ├── apps/
 │   ├── content-moderator/
 │   │   ├── contracts/moderator.py        # Content Moderator IC
@@ -521,8 +521,8 @@ See [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Links
 
-- This repository: <https://github.com/Artem1981777/genlayer-consensus-console>
-- Live app (GitHub Pages): <https://artem1981777.github.io/genlayer-consensus-console/>
+- This repository: <https://github.com/Artem1981777/genlayer-verifiable-consensus>
+- Live app (GitHub Pages): <https://artem1981777.github.io/genlayer-verifiable-consensus/>
 - GenLayer website: <https://www.genlayer.com/>
 - Docs: <https://docs.genlayer.com/>
 - Portal: <https://portal.genlayer.foundation/>
