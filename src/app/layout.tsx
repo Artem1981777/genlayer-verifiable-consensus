@@ -4,7 +4,7 @@ import { Providers } from "@/components/providers"
 import { Sidebar } from "@/components/nav"
 import { Toaster } from "sonner"
 const fontStyle = { "--font-inter": "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" } as React.CSSProperties
-export const metadata: Metadata = { title: "GenLayer Consensus Console", description: "A live control room for GenLayer Intelligent Contracts, consensus decisions and on-chain evidence." }
+export const metadata: Metadata = { title: "GenLayer Verifiable Consensus", description: "A live control room for GenLayer Intelligent Contracts, verifiable decisions and on-chain evidence." }
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" style={fontStyle}>

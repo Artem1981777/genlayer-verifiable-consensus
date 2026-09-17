@@ -38,7 +38,7 @@ export default function Overview() {
         <div className="hero-copy">
           <div className="eyebrow"><span className="dot" /> LIVE ON BRADBURY · GENLAYER TESTNET</div>
           <h2>Consensus for decisions<br /><span>that code cannot make alone.</span></h2>
-          <p>GenLayer Consensus Console is a production-style control room for Intelligent Contracts that reason over policy, evidence and live data — with every accepted decision recorded on-chain.</p>
+          <p>GenLayer Verifiable Consensus is a production-style control room for Intelligent Contracts that reason over policy, evidence and live data — with every accepted decision recorded on-chain.</p>
           <div className="flex gap wrap hero-actions">
             <a className="btn primary" href={LIVE_URL} target="_blank" rel="noreferrer">Open live dApp <ArrowUpRight size={15} /></a>
             <a className="btn" href="https://github.com/Artem1981777/genlayer-verifiable-consensus" target="_blank" rel="noreferrer">Explore source <ArrowRight size={15} /></a>

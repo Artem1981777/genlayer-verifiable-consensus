@@ -1,10 +1,10 @@
-# GenLayer Consensus Console
+# GenLayer Verifiable Consensus
 
 Interactive multi-contract dApp on GenLayer Testnet Bradbury: a thin browser client that submits real inputs to three deployed Intelligent Contracts (content moderation, prediction market, multi-source price oracle) and reads their on-chain state. Every consensus-critical decision — moderation verdicts, market outcomes, oracle medians — is computed and stored on-chain by the contracts; the frontend never decides anything.
 
 ## Open the site
 
-### [Launch GenLayer Consensus Console →](https://artem1981777.github.io/genlayer-verifiable-consensus/)
+### [Launch GenLayer Verifiable Consensus →](https://artem1981777.github.io/genlayer-verifiable-consensus/)
 
 The public live site is deployed on GitHub Pages and connects directly to GenLayer Testnet Bradbury. Connect an EIP-6963 wallet to inspect the seeded contracts, add a case, and submit real contract actions. The site includes the Overview dashboard, Analytics, and the AI Escrow Arbiter experience.
 
