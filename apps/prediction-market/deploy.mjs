@@ -24,12 +24,15 @@ const { client, accountAddress } = await setup({ needAddress: false });
 // outer consensus transaction below the network maximum. The contract's
 // execution gas is independent of this transport envelope.
 const estimateGas = client.estimateTransactionGas.bind(client);
-client.estimateTransactionGas = async (request) => {
-  const estimated = await estimateGas(request);
-  const capped = estimated > 800000n ? 800000n : estimated;
-  console.log("deployment gas estimate:", estimated.toString(), "using:", capped.toString());
-  return capped;
-};
+Object.defineProperty(client, "estimateTransactionGas", {
+  configurable: true,
+  value: async (request) => {
+    const estimated = await estimateGas(request);
+    const capped = estimated > 500000n ? 500000n : estimated;
+    console.log("deployment gas estimate:", estimated.toString(), "using:", capped.toString());
+    return capped;
+  },
+});
 
 try {
   await robust("consensus init", () => client.initializeConsensusSmartContract());
