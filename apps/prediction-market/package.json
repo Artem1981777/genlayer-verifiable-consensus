@@ -5,12 +5,12 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "deploy": "node --env-file=.env deploy.mjs",
+    "deploy": "node --env-file=.env deploy-v2.mjs",
     "interact": "node --env-file=.env interact.mjs",
     "test": "node --env-file=.env test.mjs"
   },
   "dependencies": {
-    "genlayer-js": "^1.1.8",
+    "genlayer-js": "2.0.0-rc.1",
     "viem": "^2.55.18"
   }
 }
