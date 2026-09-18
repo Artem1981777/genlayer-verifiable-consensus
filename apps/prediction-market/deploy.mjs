@@ -19,6 +19,18 @@ import { setup, robust, clean } from "./common.mjs";
 
 const { client, accountAddress } = await setup({ needAddress: false });
 
+// Bradbury rejects an overestimated EVM gas limit even when the deployment
+// payload is valid. Keep the SDK's estimate for diagnostics, but cap the
+// outer consensus transaction below the network maximum. The contract's
+// execution gas is independent of this transport envelope.
+const estimateGas = client.estimateTransactionGas.bind(client);
+client.estimateTransactionGas = async (request) => {
+  const estimated = await estimateGas(request);
+  const capped = estimated > 800000n ? 800000n : estimated;
+  console.log("deployment gas estimate:", estimated.toString(), "using:", capped.toString());
+  return capped;
+};
+
 try {
   await robust("consensus init", () => client.initializeConsensusSmartContract());
   console.log("consensus init ok");
