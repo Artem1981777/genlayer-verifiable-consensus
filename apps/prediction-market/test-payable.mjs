@@ -37,6 +37,10 @@ if (key2) {
   console.log("no PRIVATE_KEY2 in .env — finalize will be called by the creator account");
 }
 
+const strangerIsUnrelated =
+  strangerAddr !== null &&
+  String(strangerAddr).toLowerCase() !== String(accountAddress).toLowerCase();
+
 const STAKE = 1000000000000000n; // 0.001 GEN
 let pass = 0, fail = 0, evidence = [];
 const ok = (name, cond) => {
@@ -96,6 +100,33 @@ const a3 = await callTx(client, A.addr, "stake", ["YES"], STAKE);
 ok("A3 stake within window accepted", clean(a3.result));
 const stA3 = await read(A.addr);
 ok("A3 position recorded + staking started", stA3.staking_started === true && Number(stA3.yes_pool) === Number(STAKE));
+
+let fundedVoidResult = "NO_STRANGER_ACCOUNT";
+if (strangerIsUnrelated) {
+  console.log("calling void() from the STRANGER account before final deadline", strangerAddr, "...");
+  const h = await robust("funded void submit", () =>
+    strangerClient.writeContract({
+      address: A.addr,
+      functionName: "void",
+      args: []
+    })
+  );
+  const t = await result(strangerClient, h);
+  fundedVoidResult = t?.txExecutionResultName;
+  console.log("  void [stranger, funded] -> " + fundedVoidResult + " (tx " + h + ")");
+}
+
+ok(
+  "A3b unrelated account cannot void funded market before final deadline",
+  strangerIsUnrelated && isErr(fundedVoidResult)
+);
+
+const stAfterBlockedVoid = await read(A.addr);
+ok(
+  "A3b blocked void preserves open status and total pool",
+  stAfterBlockedVoid.status === "open" &&
+    Number(stAfterBlockedVoid.total_pool) === Number(STAKE)
+);
 const a4 = await callTx(client, A.addr, "resolve", []);
 ok("A4 resolve before staking deadline reverts", isErr(a4.result));
 const a5 = await callTx(client, A.addr, "finalize", []);
