@@ -2,41 +2,8 @@
 from genlayer import *
 import json
 import hashlib
-# PredictionMarketResolver v2 РІР‚вЂќ steward-review hardening:
-#
-# 1. NO CREATOR AUTHORITY ANYWHERE IN THE LIFECYCLE. resolve(), settle(),
-#    resolve_dispute() and finalize() are PERMISSIONLESS: any account may
-#    call them when the phase gates pass. void() is permissionless only for
-#    an empty market before the hard deadline; a funded market cannot be
-#    canceled by an unrelated account before final_deadline. stake(), claim()
-#    and refund() were already permissionless. The creator is only the
-#    deployer; abandoning the market cannot lock funds:
-#      - stake() is bounded by staking_deadline (trading window),
-#      - resolve() opens once staking has started and staking_deadline
-#        has passed (anyone may trigger it, retries allowed while the
-#        outcome is UNRESOLVED),
-#      - finalize() is the hard deadline exit: after final_deadline any
-#        account can always finish the market РІР‚вЂќ settling (paying the
-#        winners) when a definite outcome survived its dispute window,
-#        otherwise voiding it so every participant can refund 1:1.
-#        Funds can never be locked past final_deadline.
-#
-# 2. SOURCES ARE IMMUTABLE AND INDEPENDENT FROM BIRTH. The source set is
-#    fixed in the constructor (no add_source exists), must contain at
-#    least two http(s) URLs from at least two DIFFERENT domains, and the
-#    whole config (question + rules + sources) is hash-frozen at
-#    deployment. The creator cannot add, replace or reorder evidence
-#    after creation, and cannot build a single-domain echo chamber.
-#
-# 3. SEMANTICALLY BOUND EVIDENCE. Every source must be submitted together
-#    with a BINDING EXCERPT РІР‚вЂќ a short verbatim quote that semantically
-#    anchors the source to the market question. During resolution every
-#    node re-fetches each source and deterministically verifies that the
-#    normalized excerpt appears verbatim in the rendered page (pure
-#    substring check, no tolerance). Sources whose excerpt is not found
-#    (or that fail to load) are EXCLUDED from the evidence the resolver
-#    model may use. The model never decides which evidence is admissible;
-#    the deterministic binding check does, identically on every node.
+# PredictionMarketResolver v2: immutable bound sources, permissionless
+# lifecycle with a safe funded-market void gate, and a hard deadline exit.
 # EVM interface used only to send native GEN to an address (external message, on finalization)
 @gl.evm.contract_interface
 class _NativeRecipient:
