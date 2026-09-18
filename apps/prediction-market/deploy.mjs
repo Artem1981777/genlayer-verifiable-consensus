@@ -4,9 +4,10 @@
 // v2 hardening (steward review):
 //   * sources are immutable from creation, >= 2 different registrable domains,
 //     each bound to a verbatim binding excerpt (semantic anchor);
-//   * the lifecycle is permissionless (resolve / resolve_dispute / settle /
-//     void / finalize can be called by ANY account) and finalize() is the
-//     hard-deadline exit, so funds can never stay locked.
+//   * the lifecycle is permissionless within safety gates: resolve /
+//     resolve_dispute / settle / finalize can be called by ANY account when
+//     their phase gates pass; void() cannot cancel a funded market before
+//     final_deadline, and finalize() is the hard-deadline exit.
 //
 // Tunnels all RPC through the browser QUIC relay (rpc-relay.mjs) by default
 // (DPI workaround). Pass --direct for the plain network path.

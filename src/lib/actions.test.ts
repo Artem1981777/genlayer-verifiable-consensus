@@ -33,8 +33,8 @@ const cases: Array<[string, string, any, string | null, string[]]> = [
   ["pred disputed creator", "prediction", { status: "disputed", outcome: "YES", creator: CREATOR }, CREATOR, ["resolve_dispute"]],
   ["pred dispute_window UNRESOLVED outcome cannot settle", "prediction", { status: "dispute_window", outcome: "UNRESOLVED", dispute_deadline: pastDeadline(), creator: CREATOR }, CREATOR, ["void"]],
   // ---- finalize: the permissionless hard-deadline exit ----
-  ["pred open before final deadline: finalize hidden", "prediction", { status: "open", creator: CREATOR, final_deadline: futureDeadline() }, JUDGE, ["stake", "void"]],
-  ["pred open after final deadline: ANYONE may finalize", "prediction", { status: "open", creator: CREATOR, staking_deadline: pastDeadline(), final_deadline: pastDeadline() }, JUDGE, ["finalize", "void"]],
+  ["pred funded open before final deadline: no premature void", "prediction", { status: "open", creator: CREATOR, total_pool: 100, final_deadline: futureDeadline() }, JUDGE, ["stake"]],
+  ["pred empty open after final deadline: ANYONE may finalize or void", "prediction", { status: "open", creator: CREATOR, staking_deadline: pastDeadline(), final_deadline: pastDeadline(), total_pool: 0 }, JUDGE, ["finalize", "void"]],
   ["pred dispute_window after final deadline: settle + finalize", "prediction", { status: "dispute_window", outcome: "YES", dispute_deadline: pastDeadline(), final_deadline: pastDeadline(), creator: CREATOR }, JUDGE, ["finalize", "settle"]],
   ["pred settled after final deadline: finalize hidden", "prediction", { status: "settled", creator: CREATOR, winning_side: "YES", final_deadline: pastDeadline() }, JUDGE, []],
   ["pred settled winner unclaimed", "prediction", { status: "settled", creator: CREATOR, winning_side: "YES", positions: posOf({ [JUDGE]: { YES: 100, NO: 0 } }) }, JUDGE, ["claim"]],
@@ -148,10 +148,12 @@ describe("freeze + void helpers", () => {
     expect(voidReasonLabel({ status: "voided" })).toMatch(/voided, refunds are open/i)
     expect(voidReasonLabel({ status: "settled" })).toBe("")
   })
-  it("canVoid only without definite outcome", () => {
+  it("canVoid allows empty unresolved markets but blocks funded markets before final deadline", () => {
     expect(canVoid({ status: "open", outcome: "" })).toBe(true)
     expect(canVoid({ status: "open", outcome: "UNRESOLVED" })).toBe(true)
     expect(canVoid({ status: "dispute_window", outcome: "UNRESOLVED" })).toBe(true)
+    expect(canVoid({ status: "open", outcome: "UNRESOLVED", total_pool: 100, final_deadline: 200 }, 199)).toBe(false)
+    expect(canVoid({ status: "open", outcome: "UNRESOLVED", total_pool: 100, final_deadline: 200 }, 200)).toBe(true)
     expect(canVoid({ status: "open", outcome: "YES" })).toBe(false)
     expect(canVoid({ status: "settled", outcome: "YES" })).toBe(false)
   })

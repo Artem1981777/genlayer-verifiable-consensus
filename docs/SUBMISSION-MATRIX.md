@@ -15,13 +15,13 @@ This document is the source of truth for the current contribution submission. Ev
 | Prediction Market | `dispute(reason)` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def dispute` | `0x390CAd661cEf8e2bBAc9b6a1B8A152d9083F8ba0` |
 | Prediction Market | `resolve_dispute()` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def resolve_dispute` | `0x390CAd661cEf8e2bBAc9b6a1B8A152d9083F8ba0` |
 | Prediction Market | `settle()` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def settle` | `0x390CAd661cEf8e2bBAc9b6a1B8A152d9083F8ba0` |
-| Prediction Market | `void()` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def void` | `0x2dc09cDbb8319303eAc78E85D5d055BB53bdA6BE` |
+| Prediction Market | `void()` safety-gated | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def void` | Empty unresolved markets, or funded unresolved markets only after `final_deadline`; `0x2dc09cDbb8319303eAc78E85D5d055BB53bdA6BE` |
 | Prediction Market | `finalize()` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def finalize` | `0x2dc09cDbb8319303eAc78E85D5d055BB53bdA6BE` |
 | Prediction Market | `claim()` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def claim` | `0x390CAd661cEf8e2bBAc9b6a1B8A152d9083F8ba0` |
 | Prediction Market | `refund()` | `apps/prediction-market/contracts/prediction_market.py` — `@gl.public.write def refund` | `0x2dc09cDbb8319303eAc78E85D5d055BB53bdA6BE` |
 | Multi-Source Oracle | `update(key)` | `apps/multi-source-oracle/contracts/oracle.py` — `@gl.public.write def update` | `0x9bEcbdF8f3Cd6fABAeE5F737CE5B1B765ef9a1F5` |
 
-The dashboard exposes these actions according to contract phase, deadline, wallet role, and caller position. It does not claim that all 14 buttons are visible at once. Content Moderator actions are phase- and role-gated; Prediction Market actions are lifecycle- and position-gated; Oracle update is available when a feed is registered.
+The dashboard exposes these actions according to contract phase, deadline, wallet role, caller position, and the contract safety gate that blocks premature voiding of funded markets. It does not claim that all 14 buttons are visible at once. Content Moderator actions are phase- and role-gated; Prediction Market actions are lifecycle- and position-gated; Oracle update is available when a feed is registered.
 
 ## Accepted-receipt lifecycle
 

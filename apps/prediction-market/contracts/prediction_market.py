@@ -5,8 +5,10 @@ import hashlib
 # PredictionMarketResolver v2 РІР‚вЂќ steward-review hardening:
 #
 # 1. NO CREATOR AUTHORITY ANYWHERE IN THE LIFECYCLE. resolve(), settle(),
-#    void(), resolve_dispute() and finalize() are PERMISSIONLESS: any
-#    account may call them when the phase gates pass. stake(), claim()
+#    resolve_dispute() and finalize() are PERMISSIONLESS: any account may
+#    call them when the phase gates pass. void() is permissionless only for
+#    an empty market before the hard deadline; a funded market cannot be
+#    canceled by an unrelated account before final_deadline. stake(), claim()
 #    and refund() were already permissionless. The creator is only the
 #    deployer; abandoning the market cannot lock funds:
 #      - stake() is bounded by staking_deadline (trading window),
@@ -401,12 +403,18 @@ class PredictionMarketResolver(gl.Contract):
         self._settle_common(caller)
     @gl.public.write
     def void(self):
-        # PERMISSIONLESS safety valve: an unresolved market (no definite
-        # YES/NO outcome) may be voided by ANY account so refunds open.
-        # It can never misallocate funds: void only ever returns stakes 1:1.
+        # Safe cancellation only: an unresolved market with no funds may be
+        # voided before the hard deadline. Once any stake exists, an unrelated
+        # account must wait for final_deadline and use finalize(), so an open
+        # funded market cannot be canceled prematurely. This preserves the
+        # permissionless recovery path without exposing participant funds to
+        # an early arbitrary cancellation.
         caller = str(gl.message.sender_address)
+        now = _chain_now()
         assert self.status in ("open", "dispute_window", "dispute_resolved"), "Can only void a market that has not settled"
         assert self.outcome in ("", "UNRESOLVED"), "Cannot void a market with a definite YES/NO outcome; settle it instead"
+        yes_pool, no_pool = self._pools()
+        assert (yes_pool + no_pool) == 0 or now >= self.final_deadline, "Funded markets cannot be voided before the final deadline; use finalize after the deadline"
         self.winning_side = ""
         self.void_reason = "permissionless_void"
         self.status = "voided"

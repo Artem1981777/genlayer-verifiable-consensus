@@ -53,7 +53,8 @@ A prediction market must decide a real-world question from sources no single nod
         --settle(anyone, after window)--> settled --claim--> paid
     dispute_window --dispute(staker)--> disputed --resolve_dispute(anyone)--> dispute_resolved
     any non-terminal state --finalize(anyone, after final_deadline)--> settled|voided
-    unresolved --void(anyone)--> voided --refund--> refunded
+    empty unresolved --void(anyone)--> voided --refund--> refunded
+    funded unresolved --void(anyone, after final_deadline)--> voided --refund--> refunded
 
 `finalize()` prefers settlement when a definite outcome survived its
 dispute window; otherwise it voids with `void_reason = "deadline_void"` and
@@ -75,7 +76,7 @@ Writes:
 - `resolve_dispute()` anyone; records UPHELD/OVERTURNED and opens a fresh window.
 - `settle()` anyone, after the window; parimutuel payout pools.
 - `finalize()` anyone, after `final_deadline` (settle-or-void hard exit).
-- `void()` anyone, only without a definite YES/NO outcome.
+- `void()` safety-gated: anyone may void an empty unresolved market; a funded unresolved market can only be voided after `final_deadline` (the normal hard-exit path is `finalize()`).
 - `claim()` winners after settlement: `payout = stake * total_pool // winning_pool`.
 - `refund()` anyone with a position, after void: 1:1.
 

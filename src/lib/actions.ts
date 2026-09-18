@@ -33,7 +33,14 @@ export const alreadyClaimed = (st: any, acct?: string | null) => { const c = cla
 // refund() writes into the same "claims" map claim() uses (both set claimed:true), so double-refund is gated by the same record.
 export const alreadyRefunded = (st: any, acct?: string | null) => alreadyClaimed(st, acct)
 export const disputeRounds = (st: any): number => { if (!st) return 0; try { const h = typeof st.history === "string" ? JSON.parse(st.history) : st.history; return Array.isArray(h) ? h.filter((it: any) => it && it.kind === "dispute").length : 0 } catch { return 0 } }
-export const canVoid = (st: any) => !!(st && (st.status === "open" || st.status === "dispute_window" || st.status === "dispute_resolved") && (st.outcome === "" || st.outcome === "UNRESOLVED" || st.outcome === undefined))
+export const canVoid = (st: any, nowSec?: number) => {
+  if (!st || !["open", "dispute_window", "dispute_resolved"].includes(st.status)) return false
+  if (!(st.outcome === "" || st.outcome === "UNRESOLVED" || st.outcome === undefined)) return false
+  const funded = Number.isFinite(Number(st.total_pool)) && Number(st.total_pool) > 0
+  if (!funded) return true
+  const deadline = finalDeadline(st)
+  return deadline > 0 && (nowSec ?? Math.floor(Date.now() / 1000)) >= deadline
+}
 // dispute-window helpers: deadline is epoch seconds stored on-chain by resolve()/resolve_dispute()
 export const disputeDeadline = (st: any): number => { const n = Number(st && st.dispute_deadline); return Number.isFinite(n) ? n : 0 }
 export const disputeWindowSeconds = (st: any): number => { const n = Number(st && st.dispute_window_seconds); return Number.isFinite(n) && n > 0 ? n : 0 }
@@ -92,11 +99,12 @@ export const whyNot = (a: ActionDef, st: any, acct?: string | null): string =>
 export const ACTIONS: Record<string, ActionDef[]> = {
   prediction: [
     { fn: "stake", label: "Stake", tone: "ok", fields: [ { key: "side", label: "Side", type: "select", options: ["YES", "NO"] }, { key: "amount", label: "Amount (wei)", type: "number", placeholder: "100" } ], build: (v) => [v.side || "YES"], value: (v) => { const w = parseStakeWei(v.amount); if (w === null) throw new Error("Enter a whole, strictly positive wei amount before staking"); return w }, validate: (v) => (v.side !== "YES" && v.side !== "NO") ? "Choose a side (YES or NO)" : parseStakeWei(v.amount) === null ? "Enter a whole, strictly positive wei amount (no zero, negative or fractional values)" : null, phase: (st) => st && st.status === "open", enabled: (st) => stakingOpen(st), why: (st) => stakingDeadline(st) > 0 ? "Staking deadline has passed; the market is closed for trading" : "Staking is closed" },
-    // v2: the market lifecycle is PERMISSIONLESS — resolve, resolve_dispute,
-    // settle, void and finalize no longer require the creator. Sources are
-    // immutable from creation, so add_source is gone entirely.
+    // v2: the market lifecycle is permissionless within contract safety gates:
+    // resolve, resolve_dispute, settle and finalize are caller-independent;
+    // void additionally blocks premature cancellation of funded markets.
+    // Sources are immutable from creation, so add_source is gone entirely.
     { fn: "resolve", label: "Resolve", phase: (st) => st && st.status === "open", enabled: (st) => stakingDeadline(st) > 0 ? !stakingOpen(st) && !!(st.staking_started) : !!(st.staking_started), why: (st) => !st.staking_started ? "Nobody has staked this market yet" : stakingOpen(st) ? "Resolution opens after the staking deadline" : null },
-    { fn: "void", label: "Void", tone: "warn", phase: (st) => st && (st.status === "open" || st.status === "dispute_window" || st.status === "dispute_resolved"), enabled: (st) => canVoid(st), why: () => "Cannot void a market with a definite YES/NO outcome; settle it instead" },
+    { fn: "void", label: "Void", tone: "warn", phase: (st) => st && (st.status === "open" || st.status === "dispute_window" || st.status === "dispute_resolved"), enabled: (st) => canVoid(st), why: (st) => (Number(st?.total_pool) > 0 && finalDeadline(st) > Math.floor(Date.now() / 1000)) ? "Funded markets can only be voided after the final deadline; use Finalize then" : "Cannot void a market with a definite YES/NO outcome; settle it instead" },
     { fn: "dispute", label: "Dispute", tone: "warn", fields: [ { key: "reason", label: "Reason", type: "text", placeholder: "Requesting re-review of the cited sources" } ], build: (v) => [v.reason || ""], phase: (st) => st && (st.status === "dispute_window" || st.status === "dispute_resolved"), validate: (v) => (v && v.reason && v.reason.trim().length > 0) ? null : "Enter a reason to dispute", enabled: (st, acct) => disputeWindowOpen(st) && hasStake(st, acct) && disputeRounds(st) < 2, why: (st, acct) => !disputeWindowOpen(st) ? "Dispute window has closed; the resolved outcome is final" : !hasStake(st, acct) ? "Only a participant who staked this market can dispute" : disputeRounds(st) >= 2 ? "Dispute limit reached (max 2) for this market" : null },
     { fn: "resolve_dispute", label: "Resolve dispute", phase: (st) => st && st.status === "disputed" },
     { fn: "settle", label: "Settle", phase: (st) => st && (st.status === "dispute_window" || st.status === "dispute_resolved") && (st.outcome === "YES" || st.outcome === "NO"), enabled: (st) => !disputeWindowOpen(st), why: (st) => disputeWindowOpen(st) ? "Dispute window is still open; settlement unlocks after the deadline" : null },

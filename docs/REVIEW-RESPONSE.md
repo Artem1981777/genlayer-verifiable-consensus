@@ -21,7 +21,7 @@ The v2 contract removes **every creator check from the lifecycle**:
 | `resolve()` | creator only | **anyone** (after `staking_deadline`, with ≥1 staker) |
 | `resolve_dispute()` | creator only | **anyone** |
 | `settle()` | creator only | **anyone** (after the dispute window closes) |
-| `void()` | creator only | **anyone** (only without a definite YES/NO outcome) |
+| `void()` | creator only | **anyone with a safety gate**: empty unresolved markets before the deadline, or funded unresolved markets only after `final_deadline` |
 | `finalize()` | did not exist | **anyone** — new permissionless hard exit |
 | `stake()` / `claim()` / `refund()` / `dispute()` | already permissionless / staker-gated | unchanged |
 

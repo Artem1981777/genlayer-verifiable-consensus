@@ -53,7 +53,8 @@ Deployment transactions:
 ### Prediction Market v2 (`prediction_market.py`)
 
 > **Steward-review hardening (v2):** permissionless lifecycle (`resolve`,
-> `resolve_dispute`, `settle`, `void`, `finalize` — no creator checks) plus a hard
+> `resolve_dispute`, `settle`, `finalize` — no creator checks; `void` has an
+> explicit empty-market/final-deadline safety gate) plus a hard
 > `final_deadline` exit, and sources that are immutable from birth, multi-domain and
 > semantically bound via verbatim binding excerpts re-verified deterministically on
 > every node. Details: [`docs/REVIEW-RESPONSE.md`](./REVIEW-RESPONSE.md).
@@ -96,7 +97,8 @@ Deployment transactions:
 
 Test-result artifacts (committed): `apps/prediction-market/test-payable-results.txt`
 (deterministic suite, 20/20), `apps/prediction-market/test-results.txt` (AI lifecycle,
-19/19 consolidated), `apps/prediction-market/sim_market.py` (offline simulation, 54/54),
+19/19 consolidated), `apps/prediction-market/sim_market.py` (offline simulation, 56/56,
+including premature funded-market void rejection),
 `apps/prediction-market/parity-proof.txt` (deploy parity).
 
 ### Multi-Source Oracle (`oracle.py`)

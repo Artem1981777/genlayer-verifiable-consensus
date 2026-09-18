@@ -144,8 +144,9 @@ staking, disputes, permissionless settlement and a hard deadline exit.
 Steward-review hardening (v2):
 
 1. **No creator authority in the lifecycle.** `resolve`, `resolve_dispute`, `settle`,
-   `void`, `finalize` have no sender checks — any account drives them when the phase
-   gates pass. Trading is bounded by `staking_deadline`; after `final_deadline`,
+   `finalize` has no sender check and is permissionless after the hard deadline. `void`
+   is permissionless only for an empty unresolved market or after `final_deadline`; a
+   funded market cannot be canceled early by an unrelated account. Trading is bounded by `staking_deadline`; after `final_deadline`,
    `finalize()` (permissionless) always finishes the market: it settles when a definite
    outcome survived its dispute window, otherwise voids with 1:1 refunds. Funds can
    never stay locked.
@@ -167,7 +168,7 @@ Steward-review hardening (v2):
 | `resolve_dispute()` | write | **anyone** | re-resolves with the dispute note; records UPHELD/OVERTURNED; opens a fresh window |
 | `settle()` | write | **anyone** | after the window; pari-mutuel pools; auto-voids if the winning side is empty |
 | `finalize()` | write | **anyone** | after `final_deadline`: settle-or-void hard exit (`deadline_void` opens 1:1 refunds) |
-| `void()` | write | **anyone** | voids an unresolved market (never one with a definite YES/NO); refunds open |
+| `void()` | write | **anyone, safety-gated** | voids an empty unresolved market, or a funded unresolved market only after `final_deadline`; refunds open |
 | `claim()` | write | stakers only | single-use pari-mutuel payout on a settled market |
 | `refund()` | write | stakers only | single-use 1:1 refund on a voided market |
 | `get_state()` | view | — | full market state incl. pools, positions, claims, both deadlines, bindings, history |
@@ -347,7 +348,7 @@ Unit coverage ([`src/lib/actions.test.ts`](src/lib/actions.test.ts),
 | `classifyExecution` | success (FINISHED, FINISHED_WITH_RETURN), failure (FINISHED_WITH_ERROR, NOT_VOTED, UNDETERMINED, LEADER_TIMEOUT), pending |
 | `parseStakeWei` | rejects empty, zero, negative, fractional, non-numeric; accepts positive integers |
 | `stake.validate` / `stake.value` | side must be YES/NO; amount must be a positive integer before the wallet opens |
-| Action visibility matrix | phase (open/dispute_window/disputed/dispute_resolved/settled/voided), per-caller claim/dispute/settle/refund gating, dispute-window open/closed boundary, 2-round dispute limit, permissionless resolve/settle/resolve_dispute/void, staking/final deadline gates, finalize visibility, void gating |
+| Action visibility matrix | phase (open/dispute_window/disputed/dispute_resolved/settled/voided), per-caller claim/dispute/settle/refund gating, dispute-window open/closed boundary, 2-round dispute limit, permissionless resolve/settle/resolve_dispute, safe void gate, staking/final deadline gates, finalize visibility, void gating |
 | Live reads | `get_state` from deployed Content Moderator and Prediction Market contracts |
 
 On-chain test suites for the market contract (need a funded key):

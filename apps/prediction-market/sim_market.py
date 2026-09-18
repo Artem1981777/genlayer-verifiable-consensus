@@ -16,7 +16,7 @@ Covers the steward-review hardening:
       T16 finalize by a stranger after final_deadline (unresolved) -> void + 1:1 refunds
       T15 finalize with a definite outcome + closed window -> settle, winners paid
       T17 finalize with an open dispute window -> fail-safe void + refunds
-      T18 void (permissionless) of an unresolved market
+  T18 premature void of a funded market is rejected; final-deadline void works
   P2  immutable, independent, semantically bound sources:
       T1  creation validation: <2 sources, single domain, missing/short
           binding, bad deadlines -> rejected
@@ -534,7 +534,7 @@ as_(ALICE)
 check(cI.refund() == 600, "refund 1:1 after fail-safe finalize")
 
 # T18: permissionless void ------------------------------------------------------
-print("\n[T18] permissionless void of an unresolved market")
+print("\n[T18] funded market cannot be voided prematurely by a stranger")
 cV = new_market(pages)
 as_(ALICE)
 GL.message.value = 100
@@ -542,10 +542,13 @@ set_now(T0 + 10)
 cV.stake("YES")
 as_(STRANGER)
 set_now(T0 + 20)
+expect_reject("premature void by unrelated account rejected", lambda: cV.void())
+check(state(cV)["status"] == "open", "premature void leaves funded market open")
+set_now(FINAL_DL + 1)
 cV.void()
 st = state(cV)
 check(st["status"] == "voided" and st["void_reason"] == "permissionless_void",
-      "void by a stranger, unresolved market")
+      "void by a stranger after the final deadline")
 expect_reject("double void rejected", lambda: cV.void())
 reset_net(pages, llm="YES")
 cW = new_market(pages)
